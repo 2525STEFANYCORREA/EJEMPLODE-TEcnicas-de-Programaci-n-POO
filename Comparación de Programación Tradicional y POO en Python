@@ -1,0 +1,63 @@
+# Programa Tradicional para calcular el promedio semanal de temperaturas
+
+def ingresar_temperaturas():
+    temperaturas = []
+    print("Ingrese la temperatura diaria por 7 días:")
+    for i in range(7):
+        temp = float(input(f"Día {i + 1}: "))
+        temperaturas.append(temp)
+    return temperaturas
+
+def calcular_promedio(temperaturas):
+    return sum(temperaturas) / len(temperaturas)
+
+# Programa principal
+def main():
+    temperaturas = ingresar_temperaturas()
+    promedio = calcular_promedio(temperaturas)
+    print(f"\nPromedio semanal de temperatura: {promedio:.2f} °C")
+
+# Ejecutar programa
+if __name__ == "__main__":
+    main()
+
+
+
+
+# POO para calcular el promedio semanal de temperaturas
+
+class ClimaSemanal:
+    def __init__(self):
+        self.__temperaturas = []  # Encapsulamiento
+
+    def agregar_temperatura(self, temperatura):
+        self.__temperaturas.append(temperatura)
+
+    def ingresar_datos(self):
+        print("Ingrese la temperatura diaria por 7 días:")
+        for i in range(7):
+            temp = float(input(f"Día {i + 1}: "))
+            self.agregar_temperatura(temp)
+
+    def calcular_promedio(self):
+        return sum(self.__temperaturas) / len(self.__temperaturas)
+
+    def mostrar_resultado(self):
+        promedio = self.calcular_promedio()
+        print(f"\nPromedio semanal de temperatura: {promedio:.2f} °C")
+
+# Clase hija para mostrar herencia y polimorfismo
+class ClimaExtendido(ClimaSemanal):
+    def mostrar_resultado(self):
+        print("=== Reporte de Clima Semanal ===")
+        super().mostrar_resultado()
+
+# Programa principal
+def main():
+    clima = ClimaExtendido()  # Uso de herencia
+    clima.ingresar_datos()
+    clima.mostrar_resultado()
+
+# Ejecutar programa
+if __name__ == "__main__":
+    main()
