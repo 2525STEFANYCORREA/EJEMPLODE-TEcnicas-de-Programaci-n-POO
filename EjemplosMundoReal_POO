@@ -1,0 +1,102 @@
+// Clase Producto representa un artículo en la tienda
+class Producto {
+    private String nombre;
+    private double precio;
+    private int cantidadStock;
+
+    // Constructor para inicializar un producto
+    public Producto(String nombre, double precio, int cantidadStock) {
+        this.nombre = nombre;
+        this.precio = precio;
+        this.cantidadStock = cantidadStock;
+    }
+
+    // Método para mostrar información del producto
+    public void mostrarInfo() {
+        System.out.println("Producto: " + nombre + ", Precio: $" + precio + ", Stock: " + cantidadStock);
+    }
+
+    // Getters y setters para encapsulación
+    public String getNombre() {
+        return nombre;
+    }
+
+    public double getPrecio() {
+        return precio;
+    }
+
+    public int getCantidadStock() {
+        return cantidadStock;
+    }
+
+    public void setCantidadStock(int cantidadStock) {
+        this.cantidadStock = cantidadStock;
+    }
+}
+
+// Clase Cliente representa a un comprador
+class Cliente {
+    private String nombre;
+    private String email;
+
+    public Cliente(String nombre, String email) {
+        this.nombre = nombre;
+        this.email = email;
+    }
+
+    public void mostrarInfo() {
+        System.out.println("Cliente: " + nombre + ", Email: " + email);
+    }
+}
+
+// Clase Pedido representa una orden de compra
+class Pedido {
+    private Cliente cliente;
+    private Producto producto;
+    private int cantidad;
+
+    public Pedido(Cliente cliente, Producto producto, int cantidad) {
+        this.cliente = cliente;
+        this.producto = producto;
+        this.cantidad = cantidad;
+    }
+
+    // Método para procesar el pedido y actualizar stock
+    public void procesarPedido() {
+        if (producto.getCantidadStock() >= cantidad) {
+            producto.setCantidadStock(producto.getCantidadStock() - cantidad);
+            System.out.println("Pedido procesado para " + cliente.nombre + ": " + cantidad + " unidades de " + producto.getNombre());
+        } else {
+            System.out.println("Stock insuficiente para el producto: " + producto.getNombre());
+        }
+    }
+
+    public void mostrarResumen() {
+        System.out.println("Resumen del pedido:");
+        cliente.mostrarInfo();
+        producto.mostrarInfo();
+        System.out.println("Cantidad pedida: " + cantidad);
+    }
+}
+
+// Clase principal para ejecutar el programa
+public class TiendaPOO {
+    public static void main(String[] args) {
+        // Crear productos
+        Producto p1 = new Producto("Camiseta", 19.99, 50);
+        Producto p2 = new Producto("Pantalón", 39.99, 20);
+
+        // Crear cliente
+        Cliente c1 = new Cliente("Ana Pérez", "ana.perez@email.com");
+
+        // Crear pedido
+        Pedido pedido1 = new Pedido(c1, p1, 3);
+
+        // Mostrar información y procesar pedido
+        pedido1.mostrarResumen();
+        pedido1.procesarPedido();
+
+        // Mostrar stock actualizado
+        p1.mostrarInfo();
+    }
+}
