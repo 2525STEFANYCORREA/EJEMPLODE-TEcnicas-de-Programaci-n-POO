@@ -1,0 +1,60 @@
+/**
+ * Programa para calcular el área de un rectángulo.
+ * Solicita al usuario la base y la altura, y muestra el área calculada.
+ */
+
+import java.util.Scanner;
+
+public class calcular_area_rectangulo {
+
+    // Función para calcular el área de un rectángulo
+    public static float calcular_area(float base, float altura) {
+        return base * altura;
+    }
+
+    public static void main(String[] args) {
+        // Crear objeto Scanner para entrada de datos
+        Scanner entrada = new Scanner(System.in);
+
+        // Variables con identificadores en snake_case
+        float base_rectangulo;      // base del rectángulo
+        float altura_rectangulo;    // altura del rectángulo
+        float area_rectangulo;      // área calculada
+        boolean datos_validos = true; // bandera para validar entrada
+
+        // Solicitar base
+        System.out.print("Ingrese la base del rectángulo (float): ");
+        if (entrada.hasNextFloat()) {
+            base_rectangulo = entrada.nextFloat();
+        } else {
+            System.out.println("Error: Entrada inválida para la base.");
+            datos_validos = false;
+            base_rectangulo = 0;
+        }
+
+        // Solicitar altura
+        System.out.print("Ingrese la altura del rectángulo (float): ");
+        if (entrada.hasNextFloat()) {
+            altura_rectangulo = entrada.nextFloat();
+        } else {
+            System.out.println("Error: Entrada inválida para la altura.");
+            datos_validos = false;
+            altura_rectangulo = 0;
+        }
+
+        // Calcular y mostrar área si los datos son válidos
+        if (datos_validos) {
+            area_rectangulo = calcular_area(base_rectangulo, altura_rectangulo);
+            System.out.println("El área del rectángulo es: " + area_rectangulo);
+        } else {
+            System.out.println("No se pudo calcular el área debido a datos inválidos.");
+        }
+
+        entrada.close();
+    }
+}
+
+
+
+Descripcion del código
+ Capacidad Funcional:  Calcula el área de un rectángulo basándote en la base y altura que el usuario proporcionó.
