@@ -1,0 +1,53 @@
+// Este programa calcula el área de un rectángulo
+// y clasifica si el área es grande o pequeña basándose en un umbral.
+
+public class CalculadoraAreaRectangulo {
+
+    public static void main(String[] args) {
+        // --- Declaración de variables ---
+
+        // Identificadores descriptivos siguiendo snake_case
+        String nombre_figura = "Rectángulo"; // Tipo de dato: String
+        int longitud_entera = 15;            // Tipo de dato: int (para parte entera de la longitud)
+        double ancho_decimal = 8.5;          // Tipo de dato: double (para el ancho con decimales)
+
+        // Definición de un umbral para clasificar el área
+        double umbral_area_grande = 100.0;   // Tipo de dato: double
+
+        // --- Cálculos ---
+
+        // Convertir la longitud entera a double para el cálculo preciso del área
+        double longitud_double = (double) longitud_entera; // Casting para usar en cálculo con double
+
+        // Calcular el área del rectángulo
+        double area_rectangulo = longitud_double * ancho_decimal; // Tipo de dato: double
+
+        // --- Salida de resultados ---
+
+        System.out.println("--- Cálculo de Área de " + nombre_figura + " ---");
+        System.out.println("Longitud: " + longitud_double + " metros");
+        System.out.println("Ancho: " + ancho_decimal + " metros");
+        System.out.println("El área calculada del " + nombre_figura + " es: " + area_rectangulo + " metros cuadrados.");
+
+        // --- Clasificación del área (uso de boolean) ---
+
+        // Variable booleana para indicar si el área es grande
+        boolean es_area_grande = area_rectangulo > umbral_area_grande; // Tipo de dato: boolean
+
+        if (es_area_grande) {
+            System.out.println("Considerando el umbral de " + umbral_area_grande + " m², esta área se clasifica como: GRANDE.");
+        } else {
+            System.out.println("Considerando el umbral de " + umbral_area_grande + " m², esta área se clasifica como: PEQUEÑA.");
+        }
+
+        // Ejemplo adicional de uso de boolean para una condición simple
+        boolean es_largo_par = (longitud_entera % 2 == 0);
+        System.out.println("¿La longitud es un número par? " + es_largo_par);
+    }
+}
+
+
+
+funcionalidad
+El software lleva a cabo el proceso sencillo de determinar el área de un rectángulo y, como extra, determina si 
+el área es "grande" o "pequeña" en función de un límite establecido.
