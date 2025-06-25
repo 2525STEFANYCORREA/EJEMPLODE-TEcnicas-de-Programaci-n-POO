@@ -57,4 +57,4 @@ public class calcular_area_rectangulo {
 
 
 Descripcion del código
- Capacidad Funcional:  Calcula el área de un rectángulo basándote en la base y altura que el usuario proporcionó.
+El software lleva a cabo el proceso sencillo de determinar el área de un rectángulo y, como extra, determina si el área es "grande" o "pequeña" en función de un límite establecido.
