@@ -1,0 +1,69 @@
+// Clase base que representa un empleado
+class Empleado {
+    // Encapsulación: atributos privados con métodos getters y setters públicos
+    private String nombre;
+    private int edad;
+
+    public Empleado(String nombre, int edad) {
+        this.nombre = nombre;
+        this.edad = edad;
+    }
+
+    // Métodos getters y setters para acceder a los atributos privados
+    public String getNombre() {
+        return nombre;
+    }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+    public int getEdad() {
+        return edad;
+    }
+    public void setEdad(int edad) {
+        this.edad = edad;
+    }
+
+    // Método que puede ser sobrescrito (polimorfismo)
+    public void trabajar() {
+        System.out.println(nombre + " está trabajando.");
+    }
+}
+
+// Clase derivada que hereda de Empleado y añade un atributo específico
+class Programador extends Empleado {
+    private String lenguaje;
+
+    public Programador(String nombre, int edad, String lenguaje) {
+        super(nombre, edad); // Llamada al constructor de la clase base
+        this.lenguaje = lenguaje;
+    }
+
+    public String getLenguaje() {
+        return lenguaje;
+    }
+    public void setLenguaje(String lenguaje) {
+        this.lenguaje = lenguaje;
+    }
+
+    // Polimorfismo: sobrescritura del método trabajar para comportamiento específico
+    @Override
+    public void trabajar() {
+        System.out.println(getNombre() + " está programando en " + lenguaje + ".");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // Creación de objetos (instancias) de las clases
+        Empleado emp = new Empleado("Ana", 30);
+        Programador prog = new Programador("Luis", 25, "Java");
+
+        // Uso de métodos para demostrar encapsulación y herencia
+        emp.trabajar();      // Método de la clase base
+        prog.trabajar();     // Método sobrescrito en la clase derivada (polimorfismo)
+
+        // Modificación y acceso a atributos encapsulados mediante getters y setters
+        prog.setLenguaje("Python");
+        System.out.println(prog.getNombre() + " ahora programa en " + prog.getLenguaje() + ".");
+    }
+}
