@@ -1,0 +1,87 @@
+# Implementación de Constructores en Java
+
+**Nombre:** Stefany Leonor Correa Avila
+
+## Descripción
+Programa que demuestra el uso de constructores por defecto, parametrizados y sobrecarga de constructores en Java mediante la clase Persona.
+
+## Ejecución
+Al ejecutar la clase Main, se crean tres objetos Persona con diferentes constructores y se muestra su información en consola.
+
+// Clase Persona que representa una persona con nombre y edad
+public class Persona {
+    // Atributos privados para encapsulamiento
+    private String nombre;
+    private int edad;
+
+    /**
+     * Constructor por defecto
+     * Inicializa nombre con "Desconocido" y edad con 0
+     */
+    public Persona() {
+        this.nombre = "Desconocido";
+        this.edad = 0;
+    }
+
+    /**
+     * Constructor parametrizado
+     * @param nombre Nombre de la persona
+     * @param edad Edad de la persona
+     */
+    public Persona(String nombre, int edad) {
+        this.nombre = nombre;
+        this.edad = edad;
+    }
+
+    /**
+     * Constructor con solo nombre (sobrecarga)
+     * Inicializa edad con 0
+     * @param nombre Nombre de la persona
+     */
+    public Persona(String nombre) {
+        this.nombre = nombre;
+        this.edad = 0;
+    }
+
+    // Métodos getters para acceder a los atributos
+    public String getNombre() {
+        return nombre;
+    }
+
+    public int getEdad() {
+        return edad;
+    }
+
+    // Método para mostrar información de la persona
+    public void mostrarInformacion() {
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Edad: " + edad);
+    }
+}
+
+
+
+// Clase principal para ejecutar el programa
+public class Main {
+    public static void main(String[] args) {
+        // Crear objeto usando constructor por defecto
+        Persona persona1 = new Persona();
+        System.out.println("Persona 1:");
+        persona1.mostrarInformacion();
+
+        System.out.println();
+
+        // Crear objeto usando constructor parametrizado
+        Persona persona2 = new Persona("Stefany Correa", 25);
+        System.out.println("Persona 2:");
+        persona2.mostrarInformacion();
+
+        System.out.println();
+
+        // Crear objeto usando constructor sobrecargado (solo nombre)
+        Persona persona3 = new Persona("Carlos");
+        System.out.println("Persona 3:");
+        persona3.mostrarInformacion();
+    }
+}
+
