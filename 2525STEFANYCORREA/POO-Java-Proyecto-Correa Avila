@@ -1,0 +1,187 @@
+package com.stefanycorreaavila.proyecto.modelo;
+
+/**
+ * Clase que representa una tarea o actividad.
+ */
+public class Tarea {
+    private String descripcion;
+    private boolean completada;
+
+    public Tarea(String descripcion) {
+        this.descripcion = descripcion;
+        this.completada = false;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public boolean isCompletada() {
+        return completada;
+    }
+
+    public void completar() {
+        this.completada = true;
+    }
+
+    @Override
+    public String toString() {
+        return descripcion + (completada ? " [Completada]" : " [Pendiente]");
+    }
+}
+
+
+
+package com.stefanycorreaavila.proyecto.servicio;
+
+import com.stefanycorreaavila.proyecto.modelo.Tarea;
+import java.util.List;
+
+/**
+ * Interfaz que define operaciones para gestionar tareas.
+ */
+public interface TareaServicio {
+    void agregarTarea(Tarea tarea);
+    List<Tarea> obtenerTareas();
+}
+
+
+
+package com.stefanycorreaavila.proyecto.servicio;
+
+import com.stefanycorreaavila.proyecto.modelo.Tarea;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Implementación concreta de TareaServicio que almacena tareas en memoria.
+ */
+public class TareaServicioImpl implements TareaServicio {
+    private List<Tarea> tareas = new ArrayList<>();
+
+    @Override
+    public void agregarTarea(Tarea tarea) {
+        tareas.add(tarea);
+    }
+
+    @Override
+    public List<Tarea> obtenerTareas() {
+        return tareas;
+    }
+}
+
+
+package com.stefanycorreaavila.proyecto.dashboard;
+
+import com.stefanycorreaavila.proyecto.modelo.Tarea;
+import com.stefanycorreaavila.proyecto.servicio.TareaServicio;
+import com.stefanycorreaavila.proyecto.servicio.TareaServicioImpl;
+import com.stefanycorreaavila.proyecto.vista.Consola;
+
+import java.util.List;
+
+/**
+ * Clase Dashboard que permite gestionar tareas y mostrar un menú básico en consola.
+ * 
+ * @author Stefany Correa Avila
+ */
+public class Dashboard {
+    private TareaServicio tareaServicio;
+    private Consola consola;
+
+    /**
+     * Constructor que inicializa los servicios y la vista.
+     */
+    public Dashboard() {
+        this.tareaServicio = new TareaServicioImpl();
+        this.consola = new Consola();
+    }
+
+    /**
+     * Método principal que muestra el menú y gestiona la interacción con el usuario.
+     */
+    public void iniciar() {
+        consola.mostrarMensaje("¡Bienvenido al Dashboard de Gestión de Tareas!");
+        boolean salir = false;
+        while (!salir) {
+            mostrarMenu();
+            String opcion = consola.solicitarEntrada("Seleccione una opción: ");
+            switch (opcion) {
+                case "1":
+                    registrarTarea();
+                    break;
+                case "2":
+                    mostrarTareas();
+                    break;
+                case "3":
+                    consola.mostrarMensaje("Estado del proyecto: En desarrollo.");
+                    break;
+                case "4":
+                    salir = true;
+                    consola.mostrarMensaje("Saliendo del Dashboard. ¡Hasta luego!");
+                    break;
+                default:
+                    consola.mostrarMensaje("Opción inválida. Intente nuevamente.");
+            }
+        }
+    }
+
+    /**
+     * Muestra las opciones del menú en consola.
+     */
+    private void mostrarMenu() {
+        consola.mostrarMensaje("\n--- Menú Dashboard ---");
+        consola.mostrarMensaje("1. Registrar tarea");
+        consola.mostrarMensaje("2. Mostrar tareas");
+        consola.mostrarMensaje("3. Mostrar estado del proyecto");
+        consola.mostrarMensaje("4. Salir");
+    }
+
+    /**
+     * Permite registrar una tarea ficticia solicitando la descripción al usuario.
+     */
+    private void registrarTarea() {
+        String descripcion = consola.solicitarEntrada("Ingrese la descripción de la tarea: ");
+        Tarea tarea = new Tarea(descripcion);
+        tareaServicio.agregarTarea(tarea);
+        consola.mostrarMensaje("Tarea registrada correctamente.");
+    }
+
+    /**
+     * Muestra en consola la lista de tareas registradas.
+     */
+    private void mostrarTareas() {
+        List<Tarea> tareas = tareaServicio.obtenerTareas();
+        if (tareas.isEmpty()) {
+            consola.mostrarMensaje("No hay tareas registradas.");
+        } else {
+            consola.mostrarMensaje("\n--- Lista de Tareas ---");
+            for (int i = 0; i < tareas.size(); i++) {
+                consola.mostrarMensaje((i + 1) + ". " + tareas.get(i));
+            }
+        }
+    }
+
+    /**
+     * Método principal para ejecutar el Dashboard.
+     * @param args Argumentos de línea de comandos.
+     */
+    public static void main(String[] args) {
+        Dashboard dashboard = new Dashboard();
+        dashboard.iniciar();
+    }
+}
+
+
+
+# Proyecto Dashboard de Gestión de Tareas
+
+Este proyecto en Java implementa un sistema básico para gestionar tareas utilizando principios de Programación Orientada a Objetos. Está organizado en paquetes para modelo, servicio, vista y dashboard, aplicando principios SOLID como la separación de responsabilidades.
+
+Funcionalidades principales:
+- Registro de tareas ficticias.
+- Visualización de tareas registradas.
+- Menú interactivo en consola.
+- Mensajes de bienvenida y estado del proyecto.
+
+Desarrollado por Stefany Correa Avila.
