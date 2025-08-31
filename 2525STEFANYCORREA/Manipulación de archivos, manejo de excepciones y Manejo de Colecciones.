@@ -1,0 +1,71 @@
+import java.util.*;
+
+public class BuggyActividad {
+    public static void main(String[] args) {
+        // LISTA de nombres
+        List<String> nombres = new ArrayList<>();
+        nombres.add("Ana");
+        nombres.add("Luis");
+        nombres.add("Ana");
+
+        // Corrección: acceso a un índice válido (posición 2 en vez de 3)
+        System.out.println("Elemento en posición 2: " + nombres.get(2));
+
+        // Corrección: comparar cadenas con equals
+        String buscado = new String("Ana");
+        if (buscado.equals("Ana")) {
+            System.out.println("Encontrado");
+        }
+
+        // MAPA de teléfonos
+        Map<String, String> telefonos = new HashMap<>();
+        telefonos.put("Ana", "0991111111");
+        telefonos.put("Luis", "0992222222");
+        // Se permite sobrescribir Ana, porque es comportamiento del mapa HashMap
+        telefonos.put("Ana", "0993333333");
+
+        // Corrección: validar existencia de la clave antes de llamar toString()
+        if (telefonos.containsKey("Bea")) {
+            System.out.println("Bea: " + telefonos.get("Bea"));
+        } else {
+            System.out.println("Bea no está en el mapa de teléfonos");
+        }
+
+        // SET de inscritos, con corrección en clase Alumno para evitar duplicados lógicos
+        Set<Alumno> inscritos = new HashSet<>();
+        inscritos.add(new Alumno(1, "Ana"));
+        inscritos.add(new Alumno(2, "Luis"));
+        inscritos.add(new Alumno(1, "Ana")); // no se añadirá porque es duplicado lógico
+
+        System.out.println("Tamaño del Set: " + inscritos.size());
+        System.out.println(inscritos);
+    }
+}
+
+class Alumno {
+    int id;
+    String nombre;
+    Alumno(int id, String nombre) {
+        this.id = id;
+        this.nombre = nombre;
+    }
+
+    @Override
+    public String toString() {
+        return "Alumno{id=" + id + ", nombre='" + nombre + "'}";
+    }
+
+    // Redefinición de equals y hashCode para detección de duplicados lógicos
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Alumno)) return false;
+        Alumno other = (Alumno) obj;
+        return this.id == other.id && Objects.equals(this.nombre, other.nombre);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, nombre);
+    }
+}
