@@ -1,0 +1,228 @@
+import java.util.*;
+
+// Clase Libro (inmutable)
+public final class Libro {
+    private final String isbn;
+    private final String titulo;
+    private final String autor;
+    private final String categoria;
+
+    public Libro(String isbn, String titulo, String autor, String categoria) {
+        if (isbn == null || isbn.isEmpty() || titulo == null || titulo.isEmpty() ||
+            autor == null || autor.isEmpty() || categoria == null || categoria.isEmpty()) {
+            throw new IllegalArgumentException("Ningún campo puede ser nulo o vacío");
+        }
+        this.isbn = isbn;
+        this.titulo = titulo;
+        this.autor = autor;
+        this.categoria = categoria;
+    }
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public String getAutor() {
+        return autor;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+}
+
+// Clase Usuario
+public class Usuario {
+    private String id;
+    private String nombre;
+    private List<String> isbnsPrestados;
+
+    public Usuario(String id, String nombre) {
+        if (id == null || id.isEmpty() || nombre == null || nombre.isEmpty()) {
+            throw new IllegalArgumentException("ID y nombre no pueden ser nulos o vacíos");
+        }
+        this.id = id;
+        this.nombre = nombre;
+        this.isbnsPrestados = new ArrayList<>();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public List<String> getIsbnsPrestados() {
+        return Collections.unmodifiableList(isbnsPrestados);
+    }
+
+    void agregarPrestamo(String isbn) {
+        isbnsPrestados.add(isbn);
+    }
+
+    void quitarPrestamo(String isbn) {
+        isbnsPrestados.remove(isbn);
+    }
+}
+
+// Clase Biblioteca
+public class Biblioteca {
+    private Map<String, Libro> catalogoPorIsbn;
+    private Map<String, Usuario> usuariosPorId;
+    private Set<String> isbnsPrestados;
+
+    public Biblioteca() {
+        catalogoPorIsbn = new HashMap<>();
+        usuariosPorId = new HashMap<>();
+        isbnsPrestados = new HashSet<>();
+    }
+
+    public void añadirLibro(Libro libro) {
+        catalogoPorIsbn.put(libro.getIsbn(), libro);
+    }
+
+    public void quitarLibro(String isbn) {
+        if (isbnsPrestados.contains(isbn)) {
+            System.out.println("No se puede quitar el libro, está actualmente prestado.");
+            return;
+        }
+        catalogoPorIsbn.remove(isbn);
+    }
+
+    public void registrarUsuario(Usuario usuario) {
+        usuariosPorId.put(usuario.getId(), usuario);
+    }
+
+    public void darBajaUsuario(String id) {
+        Usuario usuario = usuariosPorId.get(id);
+        if (usuario != null && usuario.getIsbnsPrestados().isEmpty()) {
+            usuariosPorId.remove(id);
+        } else {
+            System.out.println("No se puede dar de baja, usuario tiene libros prestados o no existe.");
+        }
+    }
+
+    public void prestarLibro(String idUsuario, String isbn) {
+        Usuario usuario = usuariosPorId.get(idUsuario);
+        Libro libro = catalogoPorIsbn.get(isbn);
+
+        if (usuario == null) {
+            System.out.println("Usuario no registrado.");
+            return;
+        }
+        if (libro == null) {
+            System.out.println("Libro no disponible en el catálogo.");
+            return;
+        }
+        if (isbnsPrestados.contains(isbn)) {
+            System.out.println("El libro ya está prestado.");
+            return;
+        }
+
+        isbnsPrestados.add(isbn);
+        usuario.agregarPrestamo(isbn);
+    }
+
+    public void devolverLibro(String idUsuario, String isbn) {
+        Usuario usuario = usuariosPorId.get(idUsuario);
+        if (usuario == null) {
+            System.out.println("Usuario no registrado.");
+            return;
+        }
+        if (!isbnsPrestados.contains(isbn)) {
+            System.out.println("El libro no está prestado.");
+            return;
+        }
+        if (!usuario.getIsbnsPrestados().contains(isbn)) {
+            System.out.println("Este usuario no tiene este libro prestado.");
+            return;
+        }
+
+        isbnsPrestados.remove(isbn);
+        usuario.quitarPrestamo(isbn);
+    }
+
+    public List<Libro> buscarPorTitulo(String texto) {
+        List<Libro> resultados = new ArrayList<>();
+        for (Libro libro : catalogoPorIsbn.values()) {
+            if (libro.getTitulo().toLowerCase().contains(texto.toLowerCase())) {
+                resultados.add(libro);
+            }
+        }
+        return resultados;
+    }
+
+    public List<Libro> buscarPorAutor(String texto) {
+        List<Libro> resultados = new ArrayList<>();
+        for (Libro libro : catalogoPorIsbn.values()) {
+            if (libro.getAutor().toLowerCase().contains(texto.toLowerCase())) {
+                resultados.add(libro);
+            }
+        }
+        return resultados;
+    }
+
+    public List<Libro> buscarPorCategoria(String texto) {
+        List<Libro> resultados = new ArrayList<>();
+        for (Libro libro : catalogoPorIsbn.values()) {
+            if (libro.getCategoria().toLowerCase().contains(texto.toLowerCase())) {
+                resultados.add(libro);
+            }
+        }
+        return resultados;
+    }
+
+    public List<Libro> listarPrestados(String idUsuario) {
+        Usuario usuario = usuariosPorId.get(idUsuario);
+        if (usuario == null) {
+            return Collections.emptyList();
+        }
+        List<Libro> prestados = new ArrayList<>();
+        for (String isbn : usuario.getIsbnsPrestados()) {
+            Libro libro = catalogoPorIsbn.get(isbn);
+            if (libro != null) {
+                prestados.add(libro);
+            }
+        }
+        return prestados;
+    }
+}
+
+// Clase Main para prueba
+public class Main {
+    public static void main(String[] args) {
+        Biblioteca biblioteca = new Biblioteca();
+
+        biblioteca.registrarUsuario(new Usuario("U1", "Ana"));
+        biblioteca.registrarUsuario(new Usuario("U2", "Luis"));
+
+        biblioteca.añadirLibro(new Libro("ISBN-001", "Clean Code", "Robert C. Martin", "Software"));
+        biblioteca.añadirLibro(new Libro("ISBN-002", "Effective Java", "Joshua Bloch", "Java"));
+
+        biblioteca.prestarLibro("U1", "ISBN-001");
+        biblioteca.prestarLibro("U2", "ISBN-002");
+
+        System.out.println("Libros prestados a Ana:");
+        for (Libro libro : biblioteca.listarPrestados("U1")) {
+            System.out.println("- " + libro.getTitulo());
+        }
+
+        biblioteca.devolverLibro("U1", "ISBN-001");
+
+        System.out.println("Buscar por autor 'Bloch':");
+        for (Libro libro : biblioteca.buscarPorAutor("Bloch")) {
+            System.out.println("- " + libro.getTitulo());
+        }
+
+        System.out.println("Buscar por categoría 'Software':");
+        for (Libro libro : biblioteca.buscarPorCategoria("Software")) {
+            System.out.println("- " + libro.getTitulo());
+        }
+    }
+}
