@@ -1,0 +1,80 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class SimpleGUIApp extends JFrame {
+    private DefaultListModel<String> listModel;  // Modelo de datos para JList
+    private JTextField inputField;
+    private JList<String> dataList;
+    private JButton addButton, clearButton;
+
+    public SimpleGUIApp() {
+        super("Administración de Datos - Aplicación GUI Básica"); // Encabezado de la ventana
+
+
+        // Crear elementos
+        JLabel label = new JLabel("Ingrese texto:");
+        inputField = new JTextField(20);
+        addButton = new JButton("Agregar");
+        clearButton = new JButton("Limpiar");
+
+        // El modelo para la lista es
+        listModel = new DefaultListModel<>();
+        dataList = new JList<>(listModel);
+        JScrollPane listScrollPane = new JScrollPane(dataList);
+
+        // Layout: GridBag para orden y flexibilidad
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5,5,5,5);
+
+        // Fila 0: campo de texto y etiqueta
+        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
+        add(label, gbc);
+        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
+        add(inputField, gbc);
+
+        // Fila 1: botones de limpiar y agregar
+        gbc.gridx = 0; gbc.gridy = 1;
+        add(addButton, gbc);
+        gbc.gridx = 1;
+        add(clearButton, gbc);
+
+        // Fila 2: lista desplazable que ocupa dos columnas
+
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.BOTH; gbc.weightx = 1.0; gbc.weighty = 1.0;
+        add(listScrollPane, gbc);
+
+        // Evento
+        addButton = new JButton("Añadir");
+        clearButton = new JButton("Limpiar"); // <-- cambiado texto
+
+        // Configuración JFrame básica
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 300);
+        setLocationRelativeTo(null); // Centrar ventana
+        setVisible(true);
+    }
+
+    // Método para añadir texto a la lista, asegurándose de que no esté vacía la entrada
+    private void agregarTexto() {
+        String texto = inputField.getText().trim();
+        if (!texto.isEmpty()) {
+            listModel.addElement(texto);
+            inputField.setText("");
+        } else {
+            JOptionPane.showMessageDialog(this, "El campo está vacío", "Error", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    // Método para limpiar el campo de texto y la lista
+    private void limpiarDatos() {
+        listModel.clear();
+        inputField.setText("");
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(SimpleGUIApp::new);
+    }
+}
