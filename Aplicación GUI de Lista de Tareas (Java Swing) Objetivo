@@ -1,0 +1,161 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.*;
+
+public class ListaTareasApp extends JFrame {
+    private DefaultListModel<Tarea> modeloTareas;
+    private JList<Tarea> listaTareas;
+    private JTextField campoNuevaTarea;
+    private JButton btnAgregar;
+    private JButton btnCompletar;
+    private JButton btnEliminar;
+
+    public ListaTareasApp() {
+        setTitle("Lista de Tareas");
+        setSize(400, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null); // Centrar ventana
+
+        // Modelo para tareas: guardamos objetos Tarea con estado y texto
+        modeloTareas = new DefaultListModel<>();
+        listaTareas = new JList<>(modeloTareas);
+        listaTareas.setCellRenderer(new RenderTarea());
+
+        // Permite seleccionar solo un ítem a la vez
+        listaTareas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // Panel principal con BorderLayout
+        JPanel panelPrincipal = new JPanel(new BorderLayout(10, 10));
+        panelPrincipal.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        // Campo de texto para nueva tarea
+        campoNuevaTarea = new JTextField();
+        panelPrincipal.add(campoNuevaTarea, BorderLayout.NORTH);
+
+        // Scroll para la lista de tareas
+        JScrollPane scrollTareas = new JScrollPane(listaTareas);
+        panelPrincipal.add(scrollTareas, BorderLayout.CENTER);
+
+        // Panel para botones abajo
+        JPanel panelBotones = new JPanel();
+        btnAgregar = new JButton("Añadir Tarea");
+        btnCompletar = new JButton("Marcar como Completada");
+        btnEliminar = new JButton("Eliminar Tarea");
+        panelBotones.add(btnAgregar);
+        panelBotones.add(btnCompletar);
+        panelBotones.add(btnEliminar);
+        panelPrincipal.add(panelBotones, BorderLayout.SOUTH);
+
+        add(panelPrincipal);
+
+        // Manejo eventos botón Añadir Tarea
+        btnAgregar.addActionListener(e -> agregarTarea());
+
+        // Manejo evento tecla Enter en campo de texto para añadir tarea
+        campoNuevaTarea.addActionListener(e -> agregarTarea());
+
+        // Manejo evento botón Marcar como Completada
+        btnCompletar.addActionListener(e -> marcarComoCompletada());
+
+        // Manejo evento botón Eliminar Tarea
+        btnEliminar.addActionListener(e -> eliminarTarea());
+
+        // Evento doble clic en tarea para marcar como completada
+        listaTareas.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int index = listaTareas.locationToIndex(e.getPoint());
+                    if (index >= 0) {
+                        Tarea tarea = modeloTareas.getElementAt(index);
+                        tarea.setCompletada(!tarea.isCompletada());
+                        listaTareas.repaint();
+                    }
+                }
+            }
+        });
+    }
+
+    // Lógica para agregar una nueva tarea
+    private void agregarTarea() {
+        String texto = campoNuevaTarea.getText().trim();
+        if (!texto.isEmpty()) {
+            modeloTareas.addElement(new Tarea(texto));
+            campoNuevaTarea.setText("");
+        }
+    }
+
+    // Lógica para marcar una tarea como completada
+    private void marcarComoCompletada() {
+        int index = listaTareas.getSelectedIndex();
+        if (index >= 0) {
+            Tarea tarea = modeloTareas.getElementAt(index);
+            tarea.setCompletada(!tarea.isCompletada());
+            listaTareas.repaint();
+        }
+    }
+
+    // Lógica para eliminar una tarea seleccionada
+    private void eliminarTarea() {
+        int index = listaTareas.getSelectedIndex();
+        if (index >= 0) {
+            modeloTareas.remove(index);
+        }
+    }
+
+    // Clase interna para representar cada tarea con estado de completada
+    private class Tarea {
+        private String texto;
+        private boolean completada;
+
+        public Tarea(String texto) {
+            this.texto = texto;
+            this.completada = false;
+        }
+
+        public void setCompletada(boolean completada) {
+            this.completada = completada;
+        }
+
+        public boolean isCompletada() {
+            return completada;
+        }
+
+        public String toString() {
+            return texto;
+        }
+    }
+
+    // Render personalizado para mostrar tareas con texto tachado si completadas
+    private class RenderTarea extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus) {
+            Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof Tarea) {
+                Tarea tarea = (Tarea) value;
+                // Aplicar texto tachado y color gris si completada
+                if (tarea.isCompletada()) {
+                    setText("<html><strike>" + tarea.toString() + "</strike></html>");
+                    setForeground(Color.GRAY);
+                } else {
+                    setText(tarea.toString());
+                    setForeground(Color.BLACK);
+                }
+            }
+            return comp;
+        }
+    }
+
+    // Método principal para ejecutar la aplicación
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            ListaTareasApp app = new ListaTareasApp();
+            app.setVisible(true);
+        });
+    }
+}
