@@ -1,0 +1,134 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+
+/**
+ * Clase principal que demuestra la captura de la tecla 'C'
+ * sobre un componente JList usando Key Bindings.
+ */
+public class CapturaTeclaC extends JFrame {
+
+    private JList<String> itemList;
+    private DefaultListModel<String> listModel;
+    private JButton actionButton;
+    private JTextArea consoleArea;
+
+    public CapturaTeclaC() {
+        // --- 1. Configuración de la Ventana (JFrame) ---
+        setTitle("Captura de Tecla 'C' - Java Swing");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10)); // Usamos BorderLayout para la estructura principal
+
+        // --- 2. Creación de Componentes ---
+
+        // Modelo para la JList
+        listModel = new DefaultListModel<>();
+        listModel.addElement("Elemento 1: Seleccionable");
+        listModel.addElement("Elemento 2: Seleccionable");
+        listModel.addElement("Elemento 3: ¡Presiona 'C' aquí!");
+        listModel.addElement("Elemento 4: Seleccionable");
+
+        // Lista de elementos (JList)
+        itemList = new JList<>(listModel);
+        itemList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        // Sugerencia visual para el foco
+        itemList.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+
+        // Botón (aunque no se usa para la captura de 'C', es requerido)
+        actionButton = new JButton("Botón de Acción");
+        actionButton.addActionListener(e -> logMessage("Botón presionado."));
+
+        // Área para simular la consola/log
+        consoleArea = new JTextArea(10, 30);
+        consoleArea.setEditable(false);
+        consoleArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+        // --- 3. Implementación del Key Binding para 'C' en JList ---
+        // Key Bindings es la forma recomendada para manejar atajos de teclado en Swing.
+        // Se asocia una tecla (Stroke) a una Acción (Action) en un contexto específico.
+
+        // 3.1. Definir la Action (lo que sucede al presionar 'C')
+        Action captureCAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Se ejecuta al presionar 'C' mientras itemList tiene el foco
+                handleKeyPressC();
+            }
+        };
+
+        // 3.2. Crear el KeyStroke para la tecla 'C'
+        // InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK (etc) para modificadores
+        KeyStroke cKeyStroke = KeyStroke.getKeyStroke('C');
+
+        // 3.3. Asociar el KeyStroke con la Action en el JList
+        // El contexto es JComponent.WHEN_FOCUSED, lo que significa que
+        // la acción solo se dispara cuando el componente (itemList) tiene el foco.
+        itemList.getInputMap(JComponent.WHEN_FOCUSED).put(cKeyStroke, "captureC");
+        itemList.getActionMap().put("captureC", captureCAction);
+
+
+        // --- 4. Ensamblaje de la Interfaz ---
+
+        // Panel para la lista y el botón
+        JPanel topPanel = new JPanel(new BorderLayout(10, 0));
+        topPanel.add(new JScrollPane(itemList), BorderLayout.CENTER); // JScrollPane para la JList
+        topPanel.add(actionButton, BorderLayout.EAST);
+
+        // Añadir componentes al JFrame
+        add(topPanel, BorderLayout.NORTH);
+        add(new JScrollPane(consoleArea), BorderLayout.CENTER);
+
+        // Empaquetar y hacer visible
+        pack(); // Ajusta el tamaño de la ventana a los contenidos
+        setLocationRelativeTo(null); // Centra la ventana
+        setVisible(true);
+
+        // Mensaje inicial para guiar al usuario
+        logMessage("--- INSTRUCCIONES ---");
+        logMessage("Haz clic en la lista de elementos para darle el foco.");
+        logMessage("Luego, presiona la tecla 'C'.");
+        logMessage("---------------------");
+    }
+
+    /**
+     * Lógica que se ejecuta al presionar la tecla 'C'.
+     */
+    private void handleKeyPressC() {
+        int selectedIndex = itemList.getSelectedIndex();
+
+        if (selectedIndex != -1) {
+            // Acción 1: Alternar el estado de un elemento seleccionado
+            String currentText = listModel.getElementAt(selectedIndex);
+            String newText;
+
+            if (currentText.startsWith("[MARCADO] ")) {
+                newText = currentText.replace("[MARCADO] ", "");
+                logMessage("Elemento " + (selectedIndex + 1) + " desmarcado.");
+            } else {
+                newText = "[MARCADO] " + currentText;
+                logMessage("Elemento " + (selectedIndex + 1) + " marcado.");
+            }
+            listModel.set(selectedIndex, newText);
+        } else {
+            // Acción 2: Imprimir un mensaje en consola si no hay selección
+            logMessage("¡Tecla 'C' capturada! (No hay elemento seleccionado para marcar)");
+        }
+    }
+
+    /**
+     * Método auxiliar para imprimir mensajes en el área de texto.
+     */
+    private void logMessage(String message) {
+        consoleArea.append(message + "\n");
+        // Desplazar al final para ver el último mensaje
+        consoleArea.setCaretPosition(consoleArea.getDocument().getLength());
+    }
+
+    /**
+     * Método main para iniciar la aplicación.
+     */
+    public static void main(String[] args) {
+        // Se recomienda ejecutar la GUI en el Event Dispatch Thread (EDT)
+        SwingUtilities.invokeLater(() -> new CapturaTeclaC());
+    }
+}
