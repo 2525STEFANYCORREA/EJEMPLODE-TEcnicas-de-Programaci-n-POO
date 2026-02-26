@@ -1,0 +1,204 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program
+{
+    // Mapa: EquipoID -> Nombre equipo (teoría de mapas)
+    private static Dictionary<int, string> equipos = new Dictionary<int, string>();
+    
+    // Conjunto de todos los jugadores registrados (teoría de conjuntos - IDs únicos)
+    private static HashSet<int> jugadoresRegistrados = new HashSet<int>();
+    
+    // Mapa principal: JugadorID -> Datos del jugador (nombre, equipo)
+    private static Dictionary<int, Jugador> jugadores = new Dictionary<int, Jugador>();
+    
+    private static int proximoIdEquipo = 1;
+    private static int proximoIdJugador = 1;
+
+    static void Main(string[] args)
+    {
+        Console.WriteLine("=== REGISTRO DE JUGADORES Y EQUIPOS - TORNEO DE FÚTBOL ===");
+        Console.WriteLine("Usando teoría de conjuntos (HashSet para IDs únicos) y mapas (Dictionary clave-valor)");
+        
+        MostrarMenu();
+    }
+
+    static void MostrarMenu()
+    {
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("==================== MENÚ ====================");
+            Console.WriteLine("1. Registrar nuevo equipo");
+            Console.WriteLine("2. Registrar nuevo jugador");
+            Console.WriteLine("3. Reportería: Listar todos los equipos");
+            Console.WriteLine("4. Reportería: Listar jugadores por equipo");
+            Console.WriteLine("5. Reportería: Consultar jugador por ID");
+            Console.WriteLine("6. Reportería: Estadísticas generales");
+            Console.WriteLine("0. Salir");
+            Console.Write("Seleccione una opción: ");
+            string opcion = Console.ReadLine();
+
+            switch (opcion)
+            {
+                case "1":
+                    RegistrarEquipo();
+                    break;
+                case "2":
+                    RegistrarJugador();
+                    break;
+                case "3":
+                    ListarEquipos();
+                    break;
+                case "4":
+                    ListarJugadoresPorEquipo();
+                    break;
+                case "5":
+                    ConsultarJugador();
+                    break;
+                case "6":
+                    MostrarEstadisticas();
+                    break;
+                case "0":
+                    Console.WriteLine("¡Programa finalizado!");
+                    return;
+                default:
+                    Console.WriteLine("Opción inválida.");
+                    Pausa();
+                    break;
+            }
+        }
+    }
+
+    static void RegistrarEquipo()
+    {
+        Console.Write("Nombre del equipo: ");
+        string nombre = Console.ReadLine().Trim();
+        if (!string.IsNullOrEmpty(nombre))
+        {
+            int id = proximoIdEquipo++;
+            equipos[id] = nombre;
+            Console.WriteLine($"Equipo '{nombre}' registrado con ID: {id}");
+        }
+        else
+        {
+            Console.WriteLine("Nombre inválido.");
+        }
+        Pausa();
+    }
+
+    static void RegistrarJugador()
+    {
+        Console.WriteLine("\nEquipos disponibles:");
+        foreach (var eq in equipos)
+        {
+            Console.WriteLine($"- ID {eq.Key}: {eq.Value}");
+        }
+        
+        Console.Write("ID del equipo: ");
+        if (int.TryParse(Console.ReadLine(), out int idEquipo) && equipos.ContainsKey(idEquipo))
+        {
+            Console.Write("Nombre del jugador: ");
+            string nombre = Console.ReadLine().Trim();
+            
+            int idJugador = proximoIdJugador++;
+            jugadores[idJugador] = new Jugador { Nombre = nombre, EquipoId = idEquipo };
+            jugadoresRegistrados.Add(idJugador); // Conjunto asegura unicidad
+            
+            Console.WriteLine($"Jugador '{nombre}' registrado con ID: {idJugador} en equipo {idEquipo}");
+        }
+        else
+        {
+            Console.WriteLine("Equipo no encontrado.");
+        }
+        Pausa();
+    }
+
+    static void ListarEquipos()
+    {
+        Console.WriteLine("\n=== LISTA DE EQUIPOS ===");
+        if (equipos.Count == 0)
+        {
+            Console.WriteLine("No hay equipos registrados.");
+        }
+        else
+        {
+            foreach (var eq in equipos.OrderBy(e => e.Key))
+            {
+                int numJugadores = jugadores.Values.Count(j => j.EquipoId == eq.Key);
+                Console.WriteLine($"- ID {eq.Key}: {eq.Value} ({numJugadores} jugadores)");
+            }
+        }
+        Pausa();
+    }
+
+    static void ListarJugadoresPorEquipo()
+    {
+        Console.Write("ID del equipo: ");
+        if (int.TryParse(Console.ReadLine(), out int idEquipo) && equipos.ContainsKey(idEquipo))
+        {
+            Console.WriteLine($"\n=== JUGADORES DEL EQUIPO {idEquipo}: {equipos[idEquipo]} ===");
+            var jugadoresEquipo = jugadores.Values.Where(j => j.EquipoId == idEquipo);
+            if (!jugadoresEquipo.Any())
+            {
+                Console.WriteLine("No hay jugadores en este equipo.");
+            }
+            else
+            {
+                foreach (var j in jugadoresEquipo)
+                {
+                    Console.WriteLine($"- ID {ObtenerClaveJugador(j)}: {j.Nombre}");
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine("Equipo no encontrado.");
+        }
+        Pausa();
+    }
+
+    static void ConsultarJugador()
+    {
+        Console.Write("ID del jugador: ");
+        if (int.TryParse(Console.ReadLine(), out int idJugador) && jugadores.ContainsKey(idJugador))
+        {
+            Jugador j = jugadores[idJugador];
+            string equipoNombre = equipos.ContainsKey(j.EquipoId) ? equipos[j.EquipoId] : "Desconocido";
+            Console.WriteLine($"\nJugador ID {idJugador}: {j.Nombre} - Equipo {j.EquipoId}: {equipoNombre}");
+        }
+        else
+        {
+            Console.WriteLine("Jugador no encontrado.");
+        }
+        Pausa();
+    }
+
+    static void MostrarEstadisticas()
+    {
+        Console.WriteLine("\n=== ESTADÍSTICAS GENERALES ===");
+        Console.WriteLine($"- Equipos registrados: {equipos.Count}");
+        Console.WriteLine($"- Jugadores totales: {jugadores.Count} (conjunto único: {jugadoresRegistrados.Count})");
+        Console.WriteLine($"- Jugadores por equipo promedio: {(double)jugadores.Count / Math.Max(1, equipos.Count):F1}");
+        Pausa();
+    }
+
+    static int ObtenerClaveJugador(Jugador j)
+    {
+        return jugadores.First(kvp => kvp.Value == j).Key;
+    }
+
+    static void Pausa()
+    {
+        Console.WriteLine("\nPresione Enter para continuar...");
+        Console.ReadLine();
+    }
+}
+
+class Jugador
+{
+    public string Nombre { get; set; }
+    public int EquipoId { get; set; }
+    public override string ToString() => Nombre;
+}
