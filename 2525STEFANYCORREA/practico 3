@@ -2,203 +2,314 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-class Program
+namespace TorneoFutbol
 {
-    // Mapa: EquipoID -> Nombre equipo (teoría de mapas)
-    private static Dictionary<int, string> equipos = new Dictionary<int, string>();
-    
-    // Conjunto de todos los jugadores registrados (teoría de conjuntos - IDs únicos)
-    private static HashSet<int> jugadoresRegistrados = new HashSet<int>();
-    
-    // Mapa principal: JugadorID -> Datos del jugador (nombre, equipo)
-    private static Dictionary<int, Jugador> jugadores = new Dictionary<int, Jugador>();
-    
-    private static int proximoIdEquipo = 1;
-    private static int proximoIdJugador = 1;
-
-    static void Main(string[] args)
+    class Program
     {
-        Console.WriteLine("=== REGISTRO DE JUGADORES Y EQUIPOS - TORNEO DE FÚTBOL ===");
-        Console.WriteLine("Usando teoría de conjuntos (HashSet para IDs únicos) y mapas (Dictionary clave-valor)");
+        // ESTRUCTURAS DE DATOS - Teoria de Conjuntos y Mapas
+        private static readonly Dictionary<int, string> Equipos = new();
+        private static readonly HashSet<int> JugadoresUnicos = new();
+        private static readonly Dictionary<int, Jugador> Jugadores = new();
+        private static readonly HashSet<string> Personas = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<int, EstadisticaEquipo> TablaEquipos = new();
         
-        MostrarMenu();
-    }
+        private static int _nextEquipoId = 1;
+        private static int _nextJugadorId = 1;
+        private static readonly Random Rnd = new(123);
 
-    static void MostrarMenu()
-    {
-        while (true)
+        static void Main()
         {
-            Console.Clear();
-            Console.WriteLine("==================== MENÚ ====================");
-            Console.WriteLine("1. Registrar nuevo equipo");
-            Console.WriteLine("2. Registrar nuevo jugador");
-            Console.WriteLine("3. Reportería: Listar todos los equipos");
-            Console.WriteLine("4. Reportería: Listar jugadores por equipo");
-            Console.WriteLine("5. Reportería: Consultar jugador por ID");
-            Console.WriteLine("6. Reportería: Estadísticas generales");
-            Console.WriteLine("0. Salir");
-            Console.Write("Seleccione una opción: ");
-            string opcion = Console.ReadLine();
+            Console.WriteLine("Torneo de Futbol - Conjuntos y Mapas");
+            Console.WriteLine("Stefany Correa Avila - Universidad Estatal Amazonica");
+            Console.WriteLine("Estructuras: Dictionary (Mapas) y HashSet (Conjuntos)\n");
+            MenuPrincipal();
+        }
 
-            switch (opcion)
+        static void MenuPrincipal()
+        {
+            while (true)
             {
-                case "1":
-                    RegistrarEquipo();
-                    break;
-                case "2":
-                    RegistrarJugador();
-                    break;
-                case "3":
-                    ListarEquipos();
-                    break;
-                case "4":
-                    ListarJugadoresPorEquipo();
-                    break;
-                case "5":
-                    ConsultarJugador();
-                    break;
-                case "6":
-                    MostrarEstadisticas();
-                    break;
-                case "0":
-                    Console.WriteLine("¡Programa finalizado!");
-                    return;
-                default:
-                    Console.WriteLine("Opción inválida.");
-                    Pausa();
-                    break;
+                Console.Clear();
+                MostrarHeader();
+                Console.WriteLine("1. Registrar equipo");
+                Console.WriteLine("2. Registrar jugador");
+                Console.WriteLine("3. Generar jugadores automaticamente");
+                Console.WriteLine("4. Enlistar estructuras de datos");
+                Console.WriteLine("5. Cantidades de estructuras");
+                Console.WriteLine("6. Simular partido");
+                Console.WriteLine("7. Tabla de posiciones");
+                Console.WriteLine("8. Maximo goleador");
+                Console.WriteLine("9. Consultas");
+                Console.WriteLine("0. Salir");
+                
+                ProcesarOpcion(Console.ReadLine() ?? "");
             }
         }
-    }
 
-    static void RegistrarEquipo()
-    {
-        Console.Write("Nombre del equipo: ");
-        string nombre = Console.ReadLine().Trim();
-        if (!string.IsNullOrEmpty(nombre))
+        static void MostrarHeader()
         {
-            int id = proximoIdEquipo++;
-            equipos[id] = nombre;
-            Console.WriteLine($"Equipo '{nombre}' registrado con ID: {id}");
+            Console.WriteLine($"Estado del Torneo");
+            Console.WriteLine($"Equipos: {Equipos.Count} | Jugadores: {Jugadores.Count} | Personas: {Personas.Count}");
+            Console.WriteLine(new string('=', 50));
         }
-        else
-        {
-            Console.WriteLine("Nombre inválido.");
-        }
-        Pausa();
-    }
 
-    static void RegistrarJugador()
-    {
-        Console.WriteLine("\nEquipos disponibles:");
-        foreach (var eq in equipos)
+        static void ProcesarOpcion(string opcion)
         {
-            Console.WriteLine($"- ID {eq.Key}: {eq.Value}");
+            return switch (opcion)
+            {
+                "1" => RegistrarEquipo(),
+                "2" => RegistrarJugador(),
+                "3" => GenerarJugadores(),
+                "4" => MostrarEstructuras(),
+                "5" => MostrarCantidades(),
+                "6" => SimularPartido(),
+                "7" => MostrarTabla(),
+                "8" => MostrarMaxGoles(),
+                "9" => Consultas(),
+                "0" => Environment.Exit(0),
+                _ => Pausa("Opcion invalida")
+            };
         }
-        
-        Console.Write("ID del equipo: ");
-        if (int.TryParse(Console.ReadLine(), out int idEquipo) && equipos.ContainsKey(idEquipo))
+
+        #region OPERACIONES BASICAS
+        static void RegistrarEquipo()
         {
-            Console.Write("Nombre del jugador: ");
-            string nombre = Console.ReadLine().Trim();
+            Console.Write("Nombre del equipo: ");
+            var nombre = Console.ReadLine()?.Trim();
+            if (string.IsNullOrEmpty(nombre)) { Pausa("Nombre invalido"); return; }
             
-            int idJugador = proximoIdJugador++;
-            jugadores[idJugador] = new Jugador { Nombre = nombre, EquipoId = idEquipo };
-            jugadoresRegistrados.Add(idJugador); // Conjunto asegura unicidad
+            var id = _nextEquipoId++;
+            Equipos[id] = nombre;
+            TablaEquipos[id] = new EstadisticaEquipo { Nombre = nombre };
+            Console.WriteLine($"Equipo {id}: '{nombre}' registrado correctamente");
+            Pausa();
+        }
+
+        static void RegistrarJugador()
+        {
+            if (!ListarEquipos()) return;
             
-            Console.WriteLine($"Jugador '{nombre}' registrado con ID: {idJugador} en equipo {idEquipo}");
-        }
-        else
-        {
-            Console.WriteLine("Equipo no encontrado.");
-        }
-        Pausa();
-    }
-
-    static void ListarEquipos()
-    {
-        Console.WriteLine("\n=== LISTA DE EQUIPOS ===");
-        if (equipos.Count == 0)
-        {
-            Console.WriteLine("No hay equipos registrados.");
-        }
-        else
-        {
-            foreach (var eq in equipos.OrderBy(e => e.Key))
+            if (int.TryParse(PedirTexto("ID del equipo: "), out var eqId) && Equipos.ContainsKey(eqId))
             {
-                int numJugadores = jugadores.Values.Count(j => j.EquipoId == eq.Key);
-                Console.WriteLine($"- ID {eq.Key}: {eq.Value} ({numJugadores} jugadores)");
-            }
-        }
-        Pausa();
-    }
-
-    static void ListarJugadoresPorEquipo()
-    {
-        Console.Write("ID del equipo: ");
-        if (int.TryParse(Console.ReadLine(), out int idEquipo) && equipos.ContainsKey(idEquipo))
-        {
-            Console.WriteLine($"\n=== JUGADORES DEL EQUIPO {idEquipo}: {equipos[idEquipo]} ===");
-            var jugadoresEquipo = jugadores.Values.Where(j => j.EquipoId == idEquipo);
-            if (!jugadoresEquipo.Any())
-            {
-                Console.WriteLine("No hay jugadores en este equipo.");
-            }
-            else
-            {
-                foreach (var j in jugadoresEquipo)
+                var nombre = PedirTexto("Nombre del jugador: ");
+                if (!string.IsNullOrEmpty(nombre))
                 {
-                    Console.WriteLine($"- ID {ObtenerClaveJugador(j)}: {j.Nombre}");
+                    var id = _nextJugadorId++;
+                    Jugadores[id] = new Jugador { Nombre = nombre, EquipoId = eqId };
+                    JugadoresUnicos.Add(id);
+                    Personas.Add(nombre);
+                    Console.WriteLine($"Jugador {id}: '{nombre}' registrado en equipo {eqId}");
                 }
             }
+            Pausa();
         }
-        else
+
+        static void GenerarJugadores()
         {
-            Console.WriteLine("Equipo no encontrado.");
+            if (!ListarEquipos()) return;
+            
+            if (int.TryParse(PedirTexto("ID del equipo: "), out var eqId) && Equipos.ContainsKey(eqId))
+            {
+                if (int.TryParse(PedirTexto("Cantidad de jugadores (1-15): "), out var cant) && cant >= 1 && cant <= 15)
+                {
+                    var apellidos = new[] { "Gomez", "Lopez", "Rodriguez", "Martinez", "Garcia", "Hernandez" };
+                    var nombres = new[] { "Juan", "Pedro", "Luis", "Carlos", "Diego", "Miguel" };
+                    
+                    for (var i = 0; i < cant; i++)
+                    {
+                        var nombreCompleto = $"{nombres[Rnd.Next(nombres.Length)]} {apellidos[Rnd.Next(apellidos.Length)]}";
+                        var id = _nextJugadorId++;
+                        Jugadores[id] = new Jugador { Nombre = nombreCompleto, EquipoId = eqId, Goles = 0 };
+                        JugadoresUnicos.Add(id);
+                        Personas.Add(nombreCompleto);
+                    }
+                    Console.WriteLine($"{cant} jugadores generados automaticamente para {Equipos[eqId]}");
+                }
+            }
+            Pausa();
         }
-        Pausa();
-    }
+        #endregion
 
-    static void ConsultarJugador()
-    {
-        Console.Write("ID del jugador: ");
-        if (int.TryParse(Console.ReadLine(), out int idJugador) && jugadores.ContainsKey(idJugador))
+        #region REPORTERIA
+        static bool ListarEquipos()
         {
-            Jugador j = jugadores[idJugador];
-            string equipoNombre = equipos.ContainsKey(j.EquipoId) ? equipos[j.EquipoId] : "Desconocido";
-            Console.WriteLine($"\nJugador ID {idJugador}: {j.Nombre} - Equipo {j.EquipoId}: {equipoNombre}");
+            if (!Equipos.Any())
+            {
+                Pausa("No hay equipos registrados");
+                return false;
+            }
+            
+            Console.WriteLine("\nEquipos disponibles:");
+            foreach (var (id, nombre) in Equipos.OrderBy(e => e.Key))
+                Console.WriteLine($"  ID {id}: {nombre} ({TablaEquipos[id].Puntos} puntos)");
+            return true;
         }
-        else
+
+        static void MostrarEstructuras()
         {
-            Console.WriteLine("Jugador no encontrado.");
+            Console.WriteLine("\nESTRUCTURAS DE DATOS:");
+            Console.WriteLine("\nDICCIONARIOS (Mapas):");
+            Console.WriteLine($"  Equipos: {Equipos.Count} elementos");
+            if (Equipos.Any()) Console.WriteLine($"    {string.Join(", ", Equipos.Take(3).Select(e => $"{e.Key}:{e.Value}"))}");
+            
+            Console.WriteLine($"  Jugadores: {Jugadores.Count} elementos");
+            if (Jugadores.Any()) Console.WriteLine($"    {string.Join(", ", Jugadores.Take(3).Select(j => $"{j.Key}:{j.Value.Nombre}"))}");
+            
+            Console.WriteLine("\nCONJUNTOS:");
+            Console.WriteLine($"  Jugadores unicos: {JugadoresUnicos.Count}");
+            Console.WriteLine($"  Personas unicas: {Personas.Count}");
+            if (Personas.Any()) Console.WriteLine($"    {string.Join(", ", Personas.Take(5))}");
+            
+            Pausa();
         }
-        Pausa();
+
+        static void MostrarCantidades()
+        {
+            Console.WriteLine("\nCANTIDADES DE ELEMENTOS:");
+            Console.WriteLine($"Equipos registrados:           {Equipos.Count}");
+            Console.WriteLine($"Jugadores totales:            {Jugadores.Count}");
+            Console.WriteLine($"Jugadores unicos (HashSet):   {JugadoresUnicos.Count}");
+            Console.WriteLine($"Personas unicas (HashSet):    {Personas.Count}");
+            Console.WriteLine($"Partidos jugados total:       {TablaEquipos.Values.Sum(e => e.Partidos)}");
+            Pausa();
+        }
+
+        static void Consultas()
+        {
+            Console.WriteLine("\n1. Consultar equipo  2. Consultar jugador  3. Verificar persona");
+            switch (Console.ReadLine())
+            {
+                case "1" when int.TryParse(PedirTexto("ID equipo: "), out var eq) && Equipos.TryGetValue(eq, out var nombreEq):
+                    Console.WriteLine($"{nombreEq} - Puntos: {TablaEquipos[eq].Puntos}, GF: {TablaEquipos[eq].GF}, GC: {TablaEquipos[eq].GC}"); 
+                    break;
+                case "2" when int.TryParse(PedirTexto("ID jugador: "), out var j) && Jugadores.TryGetValue(j, out var jugador):
+                    Console.WriteLine($"Jugador {j}: {jugador.Nombre} - {jugador.Goles} goles"); 
+                    break;
+                case "3":
+                    var persona = PedirTexto("Nombre: ");
+                    Console.WriteLine(Personas.Contains(persona) ? "Persona registrada" : "Persona no encontrada");
+                    break;
+            }
+            Pausa();
+        }
+        #endregion
+
+        #region SIMULACION TORNEO
+        static void SimularPartido()
+        {
+            if (Equipos.Count < 2) { Pausa("Se necesitan minimo 2 equipos"); return; }
+            
+            if (ListarEquipos() &&
+                int.TryParse(PedirTexto("Equipo local ID: "), out var local) && Equipos.ContainsKey(local) &&
+                int.TryParse(PedirTexto("Equipo visitante ID: "), out var visitante) && Equipos.ContainsKey(visitante) && local != visitante)
+            {
+                var golesLocal = Rnd.Next(0, 5);
+                var golesVisitante = Rnd.Next(0, 5);
+                
+                ActualizarResultadoPartido(local, visitante, golesLocal, golesVisitante);
+                DistribuirGolesEquipo(local, golesLocal);
+                DistribuirGolesEquipo(visitante, golesVisitante);
+                
+                Console.WriteLine($"\nResultado: {Equipos[local]} {golesLocal} - {golesVisitante} {Equipos[visitante]}");
+            }
+            Pausa();
+        }
+
+        static void ActualizarResultadoPartido(int local, int visitante, int gLocal, int gVisitante)
+        {
+            TablaEquipos[local].GF += gLocal;   TablaEquipos[local].GC += gVisitante; TablaEquipos[local].Partidos++;
+            TablaEquipos[visitante].GF += gVisitante; TablaEquipos[visitante].GC += gLocal; TablaEquipos[visitante].Partidos++;
+            
+            if (gLocal > gVisitante) TablaEquipos[local].Puntos += 3;
+            else if (gVisitante > gLocal) TablaEquipos[visitante].Puntos += 3;
+            else { TablaEquipos[local].Puntos++; TablaEquipos[visitante].Puntos++; }
+        }
+
+        static void DistribuirGolesEquipo(int equipoId, int goles)
+        {
+            var jugadoresEquipo = Jugadores.Values.Where(j => j.EquipoId == equipoId).ToList();
+            if (jugadoresEquipo.Any())
+            {
+                var goleador = jugadoresEquipo[Rnd.Next(jugadoresEquipo.Count)];
+                goleador.Goles += goles;
+            }
+        }
+
+        static void MostrarTabla()
+        {
+            Console.WriteLine("\nTABLA DE POSICIONES");
+            Console.WriteLine("Pos | Equipo          | Pts | GF:GC | DG");
+            Console.WriteLine(new string('-', 45));
+            
+            var tabla = TablaEquipos.Values
+                .OrderByDescending(e => e.Puntos)
+                .ThenByDescending(e => e.DiferenciaGoles)
+                .ThenBy(e => e.Nombre)
+                .Select((e, i) => $"{i+1,3} | {e.Nombre,-12} | {e.Puntos,3} | {e.GF,2}:{e.GC,2} | {e.DiferenciaGoles,3}");
+
+            foreach (var linea in tabla)
+                Console.WriteLine(linea);
+            Pausa();
+        }
+
+        static void MostrarMaxGoles()
+        {
+            Console.WriteLine("\nMAXIMOS GOLEADORES");
+            var maxJugador = Jugadores.Values.OrderByDescending(j => j.Goles).FirstOrDefault();
+            if (maxJugador != null)
+                Console.WriteLine($"Jugador: {maxJugador.Nombre,-20} {maxJugador.Goles,3} goles");
+            
+            var maxEquipo = TablaEquipos.Values.OrderByDescending(e => e.GF).FirstOrDefault();
+            if (maxEquipo != null)
+                Console.WriteLine($"Equipo:  {maxEquipo.Nombre,-20} {maxEquipo.GF,3} goles a favor");
+            
+            Pausa();
+        }
+        #endregion
+
+        #region UTILIDADES
+        static string PedirTexto(string mensaje)
+        {
+            Console.Write(mensaje);
+            return Console.ReadLine() ?? "";
+        }
+
+        static bool PausaRet(string mensaje = "Enter para continuar...")
+        {
+            Console.WriteLine(mensaje);
+            Console.ReadLine();
+            return true;
+        }
+
+        static void Pausa(string mensaje = "")
+        {
+            if (!string.IsNullOrEmpty(mensaje))
+                Console.WriteLine(mensaje);
+            Console.WriteLine("Enter para continuar...");
+            Console.ReadLine();
+        }
+        #endregion
     }
 
-    static void MostrarEstadisticas()
+    class Jugador
     {
-        Console.WriteLine("\n=== ESTADÍSTICAS GENERALES ===");
-        Console.WriteLine($"- Equipos registrados: {equipos.Count}");
-        Console.WriteLine($"- Jugadores totales: {jugadores.Count} (conjunto único: {jugadoresRegistrados.Count})");
-        Console.WriteLine($"- Jugadores por equipo promedio: {(double)jugadores.Count / Math.Max(1, equipos.Count):F1}");
-        Pausa();
+        public string Nombre { get; init; } = "";
+        public int EquipoId { get; init; }
+        public int Goles { get; set; }
+
+        public override string ToString() => $"{Nombre} ({Goles} goles)";
     }
 
-    static int ObtenerClaveJugador(Jugador j)
+    class EstadisticaEquipo
     {
-        return jugadores.First(kvp => kvp.Value == j).Key;
-    }
+        public string Nombre { get; init; } = "";
+        public int Puntos { get; set; }
+        public int GF { get; set; }  // Goles a favor
+        public int GC { get; set; }  // Goles en contra
+        public int Partidos { get; set; }
 
-    static void Pausa()
-    {
-        Console.WriteLine("\nPresione Enter para continuar...");
-        Console.ReadLine();
-    }
-}
+        public int DiferenciaGoles => GF - GC;
 
-class Jugador
-{
-    public string Nombre { get; set; }
-    public int EquipoId { get; set; }
-    public override string ToString() => Nombre;
+        public override string ToString() => $"{Nombre}: {Puntos} pts, {GF}:{GC}";
+    }
 }
